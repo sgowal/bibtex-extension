@@ -1,0 +1,14 @@
+{
+  "name": "BibTeX Maker",
+  "description": "Creates a BibTeX entry corresponding to a page.",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+
+  "permissions": ["tabs", "https://arxiv.org/abs/", "https://arxiv.org/pdf/", "https://openreview.net/forum?id=*", "https://openreview.net/pdf?id=*", "https://papers.nips.cc/paper/", "http://www.roboticsproceedings.org/", "https://distill.pub/"],
+
+  "manifest_version": 2
+}
