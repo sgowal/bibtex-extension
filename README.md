@@ -7,6 +7,12 @@ paper you are currently viewing in Chrome.
 
 ## Supported websites
 
+* https://arxiv.org/abs/ and https://arxiv.org/pdf/
+* https://openreview.net/forum?id=* and https://openreview.net/pdf?id=*
+* https://papers.nips.cc/paper/
+* http://www.roboticsproceedings.org/
+* https://distill.pub/
+
 
 ## Installation
 
