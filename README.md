@@ -9,9 +9,11 @@ paper you are currently viewing in Chrome.
 
 * https://arxiv.org/abs/ and https://arxiv.org/pdf/
 * https://openreview.net/forum?id=* and https://openreview.net/pdf?id=*
-* https://papers.nips.cc/paper/
-* http://www.roboticsproceedings.org/
+* https://papers.nips.cc/paper/ (including pdf)
+* http://www.roboticsproceedings.org/ (including pdf)
 * https://distill.pub/
+* https://www.nature.com/articles/ (including pdf)
+* https://science.sciencemag.org/content/ (including pdf)
 
 
 ## Installation

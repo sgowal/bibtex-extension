@@ -1,44 +1,133 @@
-function usefulWord(word) {
+var _TYPE_MAP = {
+  "https://arxiv.org/": "article",
+  "https://www.nature.com/": "article",
+  "https://science.sciencemag.org/": "article",
+  "https://papers.nips.cc/": "incollection",
+  "https://distill.pub/": "article",
+};
+
+// http://www.roboticsproceedings.org/rss15/p01.html
+// http://www.roboticsproceedings.org/rss15/p01.pdf
+
+var _PDF_MAP = {
+  "https://www.nature.com/articles/": [
+      /^(.*\/)([^\/]*)\.pdf$/,
+      function (m) {
+        return m[1] + m[2];
+      }
+  ],
+  "https://arxiv.org/pdf/": [
+      /^https:\/\/arxiv\.org\/pdf\/([^\/]*)$/,
+      function (m) {
+        return "https://arxiv.org/abs/" + m[1];
+      }
+  ],
+  "https://openreview.net/pdf?id=": [
+      /^https:\/\/openreview\.net\/pdf\?id=([^\/]*)$/,
+      function (m) {
+        return "https://openreview.net/forum?id=" + m[1];
+      }
+  ],
+  "https://papers.nips.cc/paper/": [
+      /^(.*\/)([^\/]*)\.pdf$/,
+      function (m) {
+        return m[1] + m[2];
+      }
+  ],
+  "https://science.sciencemag.org/content/": [
+      /^(https:\/\/science\.sciencemag\.org\/content\/)([^\/]*)\/(.*)\.full\.pdf$/,
+      function (m) {
+        return m[1] + m[3];
+      }
+  ],
+  "http://www.roboticsproceedings.org/": [
+      /^(.*\/)([^\/]*)\.pdf$/,
+      function (m) {
+        return m[1] + m[2] + ".html";
+      }
+  ],
+}
+
+
+function pdf_redirect_url(url) {
+  var re = null;
+  var fn = null;
+  for (var url_start in _PDF_MAP) {
+    if (url.startsWith(url_start)) {
+      re = _PDF_MAP[url_start][0];
+      fn = _PDF_MAP[url_start][1];
+      break;
+    }
+  }
+  if (re === null) {
+    return null;
+  }
+  matches = url.match(re);
+  if (matches === null || matches.length < 2) {
+    return null;
+  }
+  return fn(matches);
+}
+
+
+function reply(data) {
+  chrome.runtime.sendMessage({
+    action: "getBibtex",
+    data: data
+  });
+}
+
+
+function error(message) {
+  chrome.runtime.sendMessage({
+    action: "getBibtex",
+    data: {
+        bibtex: message,
+        url: "",
+        title: ""
+    }
+  });
+}
+
+
+function main(url) {
+  var error_message = "Unable to find any papers on\n" + url + ".";
+  var redirect_url = pdf_redirect_url(url);
+  if (redirect_url === null) {
+    data = get_citation(document);
+    if (data === null) {
+      error(error_message);
+    } else {
+      reply(data);
+    }
+  } else {
+    error_message = "Unable to find any papers on\n" + redirect_url + ".";
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        parser = new DOMParser();
+        document_root = parser.parseFromString(request.responseText, "text/html");
+        data = get_citation(document_root);
+        if (data === null) {
+          error(error_message);
+        } else {
+          reply(data);
+        }
+      } else {
+        error(error_message);
+      }
+    };
+    request.open("GET", redirect_url, true);
+    request.send();
+  }
+}
+
+
+function useful_word(word) {
   return !(["a", "an", "the"].includes(word.toLowerCase()));
 }
 
-function DOMtoBibtex(document_root) {
-  if (current_url.startsWith("https://arxiv.org/pdf/")) {
-    var request = new XMLHttpRequest();
-    var tokens = current_url.split("/")
-    var arxiv_id = tokens[tokens.length - 1]
-    request.open("GET", "https://arxiv.org/abs/" + arxiv_id, false);
-    request.send(null);
-    if (request.status === 200) {
-      parser = new DOMParser();
-      document_root = parser.parseFromString(request.responseText, "text/html");
-      console.log(document_root);
-    } else {
-      return {
-          bibtex: "Unable to find any papers on this page.",
-          url: "",
-          title: "",
-      };
-    }
-  } else if (current_url.startsWith("https://openreview.net/pdf?id=")) {
-    var request = new XMLHttpRequest();
-    var tokens = current_url.split("=")
-    var openreview_id = tokens[tokens.length - 1]
-    request.open("GET", "https://openreview.net/forum?id=" + openreview_id, false);
-    request.send(null);
-    if (request.status === 200) {
-      parser = new DOMParser();
-      document_root = parser.parseFromString(request.responseText, "text/html");
-      console.log(document_root);
-    } else {
-      return {
-          bibtex: "Unable to find any papers on this page.",
-          url: "",
-          title: "",
-      };
-    }
-  }
-
+function get_citation(document_root) {
   var x = document_root.querySelectorAll("meta[name]");
   var i;
 
@@ -80,12 +169,12 @@ function DOMtoBibtex(document_root) {
     } else if (name == "citation_arxiv_id") {
       arxiv_id = content;
     } else if (name == "citation_pdf_url") {
-      if (!url.startsWith("http")) {
+      if (content.startsWith("http")) {
+        url = content;
+      } else {
         var arr = current_url.split("/");
         arr.pop();
         url = arr.join("/") + "/" + content;
-      } else {
-        url = content;
       }
     } else if (name == "citation_fulltext_html_url" && url == "unknown") {
       url = content;
@@ -95,33 +184,30 @@ function DOMtoBibtex(document_root) {
       conference = content;
     }
   }
+
   if (title == "unknown") {
-    return {
-        bibtex: "Unable to find any papers on this page.",
-        url: "",
-        title: "",
-    };
+    return null;
   }
 
   var first_author = authors[0].split(", ")[0].toLowerCase();
-  var first_word = title.split(" ").filter(usefulWord)[0].toLowerCase();
+  var first_word = title.split(" ").filter(useful_word)[0].toLowerCase();
   first_word = first_word.replace("-", "");
   first_word = first_word.replace(":", "");
   var authors_string = authors.join(" and ");
 
-  var bibtex = "@";
-  var is_article = false;
-  if (arxiv_id != "unknown") {
-    bibtex += "article{";
-    is_article = true;
-  } else if (current_url.startsWith("https://papers.nips.cc/paper/")) {
-    bibtex += "incollection{";
-  } else if (current_url.startsWith("https://distill.pub/")) {
-    bibtex += "article{";
-    is_article = true;
-  } else {
-    bibtex += "inproceedings{";
+  var type = null;
+  for (var url_start in _TYPE_MAP) {
+    if (current_url.startsWith(url_start)) {
+      type = _TYPE_MAP[url_start];
+      break;
+    }
   }
+  if (type === null) {
+    type = "inproceedings";
+  }
+
+  var bibtex = "@" + type + "{";
+  var is_article = type == "article";
   bibtex += first_author + year + first_word + ",\n";
   if (title != "unknown") {
     bibtex += "  title={" + title + "},\n";
@@ -153,7 +239,4 @@ function DOMtoBibtex(document_root) {
   };
 }
 
-chrome.runtime.sendMessage({
-  action: "getBibtex",
-  data: DOMtoBibtex(document)
-});
+main(current_url);

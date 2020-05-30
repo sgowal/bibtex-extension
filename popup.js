@@ -5,7 +5,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
     var bibtex_text = document.getElementById("bibtex");
     bibtex_text.innerText = request.data.bibtex;
     var link_text = document.getElementById("link");
-    link_text.innerText = request.data.url + ": " + request.data.title
+    link_text.innerHTML = request.data.url + ": " + request.data.title
   }
 });
 
@@ -40,7 +40,7 @@ function onWindowLoad() {
       }, function() {
         // If you try and inject into an extensions page or the webstore/NTP you'll get an error.
         if (chrome.runtime.lastError) {
-          bibtex_text.innerText = 'This is not recognized as a paper.\nTry on https://arxiv.org/abs/ pages.';
+          bibtex_text.innerHTML = 'This is not recognized as a paper.\nTry on https://arxiv.org/abs/ pages.\nFor example: <a href="https://arxiv.org/abs/2005.13537">https://arxiv.org/abs/2005.13537</a>';
         }
       });
     });

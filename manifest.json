@@ -8,7 +8,16 @@
     "default_popup": "popup.html"
   },
 
-  "permissions": ["tabs", "https://arxiv.org/abs/", "https://arxiv.org/pdf/", "https://openreview.net/forum?id=*", "https://openreview.net/pdf?id=*", "https://papers.nips.cc/paper/", "http://www.roboticsproceedings.org/", "https://distill.pub/"],
+  "permissions": [
+    "tabs",
+    "https://arxiv.org/abs/", "https://arxiv.org/pdf/",
+    "https://openreview.net/forum?id=*", "https://openreview.net/pdf?id=*",
+    "https://papers.nips.cc/paper/",
+    "http://www.roboticsproceedings.org/",
+    "https://distill.pub/",
+    "https://www.nature.com/articles/",
+    "https://science.sciencemag.org/content/"
+  ],
 
   "manifest_version": 2
 }
