@@ -14,7 +14,9 @@ paper you are currently viewing in Chrome.
 * https://distill.pub/
 * https://www.nature.com/articles/ (including pdf)
 * https://science.sciencemag.org/content/ (including pdf)
-
+* https://ieeexplore.ieee.org/document/ (excludes pdf)
+* https://www.medrxiv.org/content/ (including pdf)
+* https://www.biorxiv.org/content/ (including pdf)
 
 ## Installation
 

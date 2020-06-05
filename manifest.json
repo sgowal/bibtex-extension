@@ -11,12 +11,15 @@
   "permissions": [
     "tabs",
     "https://arxiv.org/abs/", "https://arxiv.org/pdf/",
+    "https://www.medrxiv.org/content/",
+    "https://www.biorxiv.org/content/",
     "https://openreview.net/forum?id=*", "https://openreview.net/pdf?id=*",
     "https://papers.nips.cc/paper/",
     "http://www.roboticsproceedings.org/",
     "https://distill.pub/",
     "https://www.nature.com/articles/",
-    "https://science.sciencemag.org/content/"
+    "https://science.sciencemag.org/content/",
+    "https://ieeexplore.ieee.org/document/"
   ],
 
   "manifest_version": 2

@@ -1,5 +1,3 @@
-
-
 chrome.runtime.onMessage.addListener(function(request, sender) {
   if (request.action == "getBibtex") {
     var bibtex_text = document.getElementById("bibtex");
