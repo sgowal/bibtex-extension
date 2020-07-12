@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html style=''>
+<html>
 <head>
-<script src='popup.js'></script>
+<script src="zotero.js"></script>
+<script src="popup.js"></script>
 </head>
+
 <body style="width:400px;">
 <pre>
-<div id='bibtex'></div>
+<div id="bibtex"></div>
 </pre>
-<button id='bibtex-btn'>Copy BibTeX</button>
-<button id='link-btn'>Copy link</button>
-<div id='link' style='position: absolute; left: -9999px;'></div>
+
+<button id="bibtex-btn">Copy BibTeX</button>
+<button id="link-btn">Copy link</button>
+<button id="zotero-btn">Save to Zotero</button>
+
+<div id="status"></div>
+<div id="link" style="position: absolute; left: -9999px;"></div>
+
 </body>
 </html>

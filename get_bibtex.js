@@ -1,73 +1,83 @@
 var _TYPE_MAP = {
-  "https://arxiv.org/": "article",
-  "https://www.medrxiv.org/": "article",
-  "https://arxiv.org/": "article",
-  "https://www.biorxiv.org/": "article",
-  "https://science.sciencemag.org/": "article",
-  "https://papers.nips.cc/": "incollection",
-  "https://distill.pub/": "article",
+  "arxiv.org/": "article",
+  "www.medrxiv.org/": "article",
+  "www.biorxiv.org/": "article",
+  "science.sciencemag.org/": "article",
+  "papers.nips.cc/": "incollection",
+  "distill.pub/": "article",
 };
 
 
 var _PDF_MAP = {
-  "https://www.nature.com/articles/": [
+  "www.nature.com/articles/": [
       /^(.*\/)([^\/]*)\.pdf$/,
       function (m) {
         return m[1] + m[2];
       }
   ],
-  "https://arxiv.org/pdf/": [
+  "arxiv.org/pdf/": [
       /^https:\/\/arxiv\.org\/pdf\/([^\/]*)$/,
       function (m) {
         return "https://arxiv.org/abs/" + m[1];
       }
   ],
-  "https://www.medrxiv.org/content/": [
+  "www.medrxiv.org/content/": [
       /^(https:\/\/www\.medrxiv\.org\/content\/)([^\/]*)\/([^\/]*)\.full\.pdf$/,
       function (m) {
         return m[1] + m[2] + "/" + m[3];
       }
   ],
-  "https://www.biorxiv.org/content/": [
+  "www.biorxiv.org/content/": [
       /^(https:\/\/www\.biorxiv\.org\/content\/)([^\/]*)\/([^\/]*)\.full\.pdf$/,
       function (m) {
         return m[1] + m[2] + "/" + m[3];
       }
   ],
-  "https://openreview.net/pdf?id=": [
+  "openreview.net/pdf?id=": [
       /^https:\/\/openreview\.net\/pdf\?id=([^\/]*)$/,
       function (m) {
         return "https://openreview.net/forum?id=" + m[1];
       }
   ],
-  "https://papers.nips.cc/paper/": [
+  "papers.nips.cc/paper/": [
       /^(.*\/)([^\/]*)\.pdf$/,
       function (m) {
         return m[1] + m[2];
       }
   ],
-  "https://science.sciencemag.org/content/": [
+  "science.sciencemag.org/content/": [
       /^(https:\/\/science\.sciencemag\.org\/content\/)([^\/]*)\/(.*)\.full\.pdf$/,
       function (m) {
         return m[1] + m[3];
       }
   ],
-  "http://www.roboticsproceedings.org/": [
+  "www.roboticsproceedings.org/": [
       /^(.*\/)([^\/]*)\.pdf$/,
       function (m) {
         return m[1] + m[2] + ".html";
       }
   ],
+};
+
+
+function in_domain(domain, url) {
+  if (url.startsWith("https://")) {
+    return url.substring(8).startsWith(domain);
+  } else if (url.startsWith("http://")) {
+    return url.substring(7).startsWith(domain);
+  } else {
+    return url.startsWith(domain);
+  }
 }
 
 
 function pdf_redirect_url(url) {
   var re = null;
   var fn = null;
-  for (var url_start in _PDF_MAP) {
-    if (url.startsWith(url_start)) {
-      re = _PDF_MAP[url_start][0];
-      fn = _PDF_MAP[url_start][1];
+  for (var domain in _PDF_MAP) {
+    if (in_domain(domain, url)) {
+      re = _PDF_MAP[domain][0];
+      fn = _PDF_MAP[domain][1];
       break;
     }
   }
@@ -91,6 +101,18 @@ function reply(data) {
 
 
 function error(message) {
+  chrome.runtime.sendMessage({
+    action: "getBibtex",
+    data: {
+        bibtex: message,
+        url: "",
+        title: ""
+    }
+  });
+}
+
+
+function update(message) {
   chrome.runtime.sendMessage({
     action: "getBibtex",
     data: {
@@ -135,8 +157,10 @@ function main(url) {
         } else {
           reply(data);
         }
-      } else {
+      } else if (this.readyState == 4) {
         error(error_message);
+      } else {
+        update("Fetching...");
       }
     };
     request.open("GET", redirect_url, true);
@@ -151,18 +175,18 @@ function useful_word(word) {
 
 
 function canonicalize_author(author) {
-  tokens = author.split(", ")
+  tokens = author.split(", ");
   var new_author = author;
   if (tokens.length == 1) {
-    tokens = author.split(" ")
+    tokens = author.split(" ");
     if (tokens.length >= 2) {
       new_author = tokens[tokens.length - 1] + ", ";
       tokens.pop();
-      new_author += tokens.map(function(val, index){ 
+      new_author += tokens.map(function(val, index){
         if (val.endsWith(".")) {
-          return val.substring(0, val.length - 1)
+          return val.substring(0, val.length - 1);
         }
-        return val; 
+        return val;
       }).join(" ");
     }
   }
@@ -170,23 +194,27 @@ function canonicalize_author(author) {
 }
 
 
-function build_bibtex(title, authors, journal_or_conference, year, pdf_url) {
-  var first_author = authors[0].split(", ")[0].toLowerCase();
-  var first_word = title.split(" ").filter(useful_word)[0].toLowerCase();
-  first_word = first_word.replace("-", "");
-  first_word = first_word.replace(":", "");
-  var authors_string = authors.join(" and ");
-
+function get_type(url) {
   var type = null;
-  for (var url_start in _TYPE_MAP) {
-    if (current_url.startsWith(url_start)) {
-      type = _TYPE_MAP[url_start];
+  for (var domain in _TYPE_MAP) {
+    if (in_domain(domain, url)) {
+      type = _TYPE_MAP[domain];
       break;
     }
   }
   if (type === null) {
     type = "inproceedings";
   }
+  return type;
+}
+
+
+function build_bibtex(type, title, authors, journal_or_conference, year, pdf_url) {
+  var first_author = authors[0].split(", ")[0].toLowerCase();
+  var first_word = title.split(" ").filter(useful_word)[0].toLowerCase();
+  first_word = first_word.replace("-", "");
+  first_word = first_word.replace(":", "");
+  var authors_string = authors.join(" and ");
 
   var bibtex = "@" + type + "{";
   var is_article = type == "article";
@@ -252,7 +280,7 @@ function get_citation(document_root) {
     } else if (name == "citation_arxiv_id") {
       conference = "arXiv preprint arXiv:" + content;
     } else if (name == "citation_mjid") {
-      var tokens = content.split(";")
+      var tokens = content.split(";");
       if (tokens[0] == "biorxiv") {
         conference = "bioRxiv preprint bioRxiv:" + tokens[1];
       } else if (tokens[0] == "medrxiv") {
@@ -275,10 +303,15 @@ function get_citation(document_root) {
     return null;
   }
 
+  var type = get_type(current_url);
   return {
-      bibtex: build_bibtex(title, authors, conference, year, url),
+      bibtex: build_bibtex(type, title, authors, conference, year, url),
       url: url,
       title: title,
+      authors: authors,
+      journal_or_conference: conference,
+      year: year,
+      type: type,
   };
 }
 
@@ -289,7 +322,7 @@ function retrieve_window_variables(names) {
   var script_content = "";
   for (var i = 0; i < names.length; i++) {
     var variable = names[i];
-    script_content += "if (typeof " + variable + " !== 'undefined') document.getElementsByTagName('body')[0].setAttribute('tmp_" + variable + "', JSON.stringify(" + variable + "));\n"
+    script_content += "if (typeof " + variable + " !== 'undefined') document.getElementsByTagName('body')[0].setAttribute('tmp_" + variable + "', JSON.stringify(" + variable + "));\n";
   }
 
   var script = document.createElement('script');
@@ -310,19 +343,24 @@ function retrieve_window_variables(names) {
 
 function ieeexplore() {
   var g = retrieve_window_variables(["global"])["global"];
-  
+
   var title = g.document.metadata.title;
-  var authors = g.document.metadata.authors.map(function(val, index){ 
+  var authors = g.document.metadata.authors.map(function(val, index){
     return canonicalize_author(val.name);
-  })
+  });
   var conference = g.document.metadata.publicationTitle;
   var year = g.document.metadata.publicationYear;
   var url = g.document.metadata.pdfPath;
+  var type = get_type(current_url);
 
   return {
-      bibtex: build_bibtex(title, authors, conference, year, url),
+      bibtex: build_bibtex(type, title, authors, conference, year, url),
       url: url,
       title: title,
+      authors: authors,
+      journal_or_conference: conference,
+      year: year,
+      type: type,
   };
 }
 
