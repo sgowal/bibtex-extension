@@ -39,19 +39,23 @@ function onWindowLoad() {
         zotero_access_key: "",
         zotero_collection: "none",
       }, function(items) {
-        document.getElementById("status").innerText = "Saving...";
-        zotero_create_item(
-            items.zotero_user_id, items.zotero_access_key,
-            last_data_received.type,
-            last_data_received.title,
-            last_data_received.authors,
-            last_data_received.journal_or_conference,
-            last_data_received.year,
-            last_data_received.url,
-            items.zotero_collection,
-            function (message) {
-              document.getElementById("status").innerText = message;
-            });
+        if (items.zotero_user_id !== "" && items.zotero_access_key !== "" && items.zotero_collection != "none") {
+          document.getElementById("status").innerText = "Saving...";
+          zotero_create_item(
+              items.zotero_user_id, items.zotero_access_key,
+              last_data_received.type,
+              last_data_received.title,
+              last_data_received.authors,
+              last_data_received.journal_or_conference,
+              last_data_received.year,
+              last_data_received.url,
+              items.zotero_collection,
+              function (message) {
+                document.getElementById("status").innerText = message;
+              });
+        } else {
+          document.getElementById("status").innerText = "Zotero not configured.";
+        }
       });
     }
   });
