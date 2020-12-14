@@ -7,6 +7,8 @@ var DOMAIN_TYPES = {
   "www.biorxiv.org/": "article",
   "science.sciencemag.org/": "article",
   "papers.nips.cc/": "incollection",
+  "papers.neurips.cc/": "incollection",
+  "proceedings.neurips.cc/paper/": "incollection",
   "distill.pub/": "article",
 };
 
@@ -48,6 +50,18 @@ var PDF_DOMAINS = {
         return m[1] + m[2];
       }
   ],
+  "papers.neurips.cc/paper/": [
+      /^(.*\/)([^\/]*)\.pdf$/,
+      function (m) {
+        return m[1] + m[2];
+      }
+  ],
+  "proceedings.neurips.cc/paper/": [
+      /^(.*\/)file\/([^\/]*)-Paper\.pdf$/,
+      function (m) {
+        return m[1] + "hash/" + m[2] + "-Abstract.html";
+      }
+  ],
   "science.sciencemag.org/content/": [
       /^(https:\/\/science\.sciencemag\.org\/content\/)([^\/]*)\/(.*)\.full\.pdf$/,
       function (m) {
@@ -58,6 +72,12 @@ var PDF_DOMAINS = {
       /^(.*\/)([^\/]*)\.pdf$/,
       function (m) {
         return m[1] + m[2] + ".html";
+      }
+  ],
+  "openaccess.thecvf.com/": [
+      /^(.*\/)papers\/([^\/]*)\.pdf$/,
+      function (m) {
+        return m[1] + "html/" + m[2] + ".html";
       }
   ],
 };

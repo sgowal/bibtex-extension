@@ -24,7 +24,7 @@ function ieeexplore_retrieve_window_variables(names) {
 
 
 function ieeexplore() {
-  var g = ieeexplore_retrieve_window_variables(["global"])["global"];
+  var g = ieeexplore_retrieve_window_variables(["xplGlobal"])["xplGlobal"];
 
   var title = g.document.metadata.title;
   var authors = g.document.metadata.authors.map(function(val, index){

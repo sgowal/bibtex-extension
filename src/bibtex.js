@@ -1,13 +1,14 @@
 function bibtex_build(type, title, authors, journal_or_conference, year, pdf_url, current_url) {
   var first_author = authors[0].split(", ")[0].toLowerCase();
   var first_word = title.split(" ").filter(bibtex_useful_word)[0].toLowerCase();
-  first_word = first_word.replace("-", "");
-  first_word = first_word.replace(":", "");
+  first_word = first_word.replace(/-/g, "");
+  first_word = first_word.replace(/:/g, "");
+  first_word = first_word.replace(/\+/g, "");
   var authors_string = authors.join(" and ");
 
   var bibtex = "@" + type + "{";
   var is_article = type == "article";
-  bibtex += first_author + year + first_word + ",\n";
+  bibtex += first_author.replace(/ /g, "") + year + first_word + ",\n";
   if (title !== null) {
     bibtex += "  title={" + title + "},\n";
   }

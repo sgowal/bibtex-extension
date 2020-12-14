@@ -10,6 +10,7 @@ paper you are currently viewing in Chrome.
 * https://arxiv.org/abs/ and https://arxiv.org/pdf/
 * https://openreview.net/forum?id=* and https://openreview.net/pdf?id=*
 * https://papers.nips.cc/paper/ (including pdf)
+* https://papers.neurips.cc/paper/ (including pdf)
 * http://www.roboticsproceedings.org/ (including pdf)
 * https://distill.pub/
 * https://www.nature.com/articles/ (including pdf)
@@ -17,6 +18,7 @@ paper you are currently viewing in Chrome.
 * https://ieeexplore.ieee.org/document/ (excludes pdf)
 * https://www.medrxiv.org/content/ (including pdf)
 * https://www.biorxiv.org/content/ (including pdf)
+* https://openaccess.thecvf.com/ (including pdf)
 
 ## Installation
 
