@@ -66,6 +66,10 @@ function get_citation(document_root) {
       title = content;
     } else if (name == "citation_author") {
       authors.push(canonicalize_author(content));
+    } else if (name == "citation_authors" && authors.length == 0) {
+      authors = content.split('; ').map(function(val, index){
+        return canonicalize_author(val);
+      })
     } else if (name == "citation_publication_date") {
       year = content.split(/[\/-]/)[0];
     } else if (name == "citation_date") {

@@ -43,5 +43,5 @@ function bibtex_build(type, title, authors, journal_or_conference, year, pdf_url
 
 
 function bibtex_useful_word(word) {
-  return !(["a", "an", "the"].includes(word.toLowerCase()));
+  return !(["a", "an", "the", "on", "is", "are"].includes(word.toLowerCase()));
 }
