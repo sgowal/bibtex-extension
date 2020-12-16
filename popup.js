@@ -100,6 +100,7 @@ function on_window_load() {
     execute_scripts(null, [
         {code: "var current_url = " + current_url + ";"},
         {file: "src/domains.js"},
+        {file: "src/extensions/acm.js"},
         {file: "src/extensions/ieeexplore.js"},
         {file: "src/extractor.js"},
     ]);

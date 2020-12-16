@@ -23,7 +23,7 @@ function ieeexplore_retrieve_window_variables(names) {
 }
 
 
-function ieeexplore() {
+function ieeexplore(current_url) {
   var g = ieeexplore_retrieve_window_variables(["xplGlobal"])["xplGlobal"];
 
   var title = g.document.metadata.title;

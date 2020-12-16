@@ -1,7 +1,7 @@
 {
   "name": "BibTeX Maker",
   "description": "Creates a BibTeX entry corresponding to a page.",
-  "version": "1.0",
+  "version": "1.0.1",
 
   "options_ui": {
     "page": "options.html",
@@ -28,7 +28,8 @@
     "https://www.nature.com/articles/",
     "https://science.sciencemag.org/content/",
     "https://ieeexplore.ieee.org/document/",
-    "https://openaccess.thecvf.com/"
+    "https://openaccess.thecvf.com/",
+    "https://dl.acm.org/doi/"
   ],
 
   "manifest_version": 2

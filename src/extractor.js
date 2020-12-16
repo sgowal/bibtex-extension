@@ -1,36 +1,37 @@
 // This script is injected into the current page to extract the citation information.
 
 function main(url) {
-  var error_message = "Unable to find any papers on\n" + url + ".";
-  for (var domain in EXTENDED_DOMAINS) {
-    if (!url.startsWith(domain)) {
-      continue;
+  var redirect = pdf_redirect_url(url);
+  if (redirect === null) {
+    // Not on PDF page.
+    var error_message = "Unable to find any papers on\n" + url + ".";
+    for (var domain in EXTENDED_DOMAINS) {
+      if (!url.startsWith(domain)) {
+        continue;
+      }
+      var data = EXTENDED_DOMAINS[domain](url);
+      if (data === null) {
+        error(error_message);
+      } else {
+        reply(data);
+      }
+      return;
     }
-    var data = EXTENDED_DOMAINS[domain]();
-    if (data === null) {
-      error(error_message);
-    } else {
-      reply(data);
-    }
-    return;
-  }
-
-  var redirect_url = pdf_redirect_url(url);
-  if (redirect_url === null) {
-    var data = get_citation(document);
+    var data = get_citation(document, url);
     if (data === null) {
       error(error_message);
     } else {
       reply(data);
     }
   } else {
-    error_message = "Unable to find any papers on\n" + redirect_url + ".";
+    // PDF page, try to get the original content.
+    var error_message = "Unable to find any papers on\n" + redirect.url + ".";
     var request = new XMLHttpRequest();
     request.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         parser = new DOMParser();
         document_root = parser.parseFromString(request.responseText, "text/html");
-        var data = get_citation(document_root);
+        var data = redirect.get_citation(document_root, redirect.url);
         if (data === null) {
           error(error_message);
         } else {
@@ -42,13 +43,13 @@ function main(url) {
         update("Fetching...");
       }
     };
-    request.open("GET", redirect_url, true);
+    request.open("GET", redirect.url, true);
     request.send();
   }
 }
 
 
-function get_citation(document_root) {
+function get_citation(document_root, current_url) {
   var x = document_root.querySelectorAll("meta[name]");
   var i;
 
@@ -129,10 +130,14 @@ function in_domain(domain, url) {
 function pdf_redirect_url(url) {
   var re = null;
   var fn = null;
+  var process_fn = get_citation;
   for (var domain in PDF_DOMAINS) {
     if (in_domain(domain, url)) {
       re = PDF_DOMAINS[domain][0];
       fn = PDF_DOMAINS[domain][1];
+      if (PDF_DOMAINS[domain].length == 3) {
+        process_fn = PDF_DOMAINS[domain][2];
+      }
       break;
     }
   }
@@ -143,7 +148,10 @@ function pdf_redirect_url(url) {
   if (matches === null || matches.length < 2) {
     return null;
   }
-  return fn(matches);
+  return {
+    url: fn(matches),
+    get_citation: process_fn,
+  };
 }
 
 
