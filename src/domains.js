@@ -80,4 +80,10 @@ var PDF_DOMAINS = {
         return m[1] + "html/" + m[2] + ".html";
       }
   ],
+  "proceedings.mlr.press/": [
+      /^(.*)\/([^\/]*)\.pdf$/,
+      function (m) {
+        return m[1] + ".html";
+      }
+  ],
 };

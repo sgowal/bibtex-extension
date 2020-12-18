@@ -29,7 +29,8 @@
     "https://science.sciencemag.org/content/",
     "https://ieeexplore.ieee.org/document/",
     "https://openaccess.thecvf.com/",
-    "https://dl.acm.org/doi/"
+    "https://dl.acm.org/doi/",
+    "http://proceedings.mlr.press/"
   ],
 
   "manifest_version": 2

@@ -19,6 +19,7 @@ paper you are currently viewing in Chrome.
 * https://www.medrxiv.org/content/ (including pdf)
 * https://www.biorxiv.org/content/ (including pdf)
 * https://openaccess.thecvf.com/ (including pdf)
+* http://proceedings.mlr.press/ (including pdf)
 
 ## Installation
 
