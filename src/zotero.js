@@ -8,7 +8,7 @@ var _ZOTERO_TYPE_MAP = {
 function zotero_full_name(key, names, parents) {
   var name = names[key];
   if (parents[key] !== null) {
-    return full_name(parents[key], names, parents) + '>' + name;
+    return zotero_full_name(parents[key], names, parents) + '>' + name;
   } else {
     return name;
   }
